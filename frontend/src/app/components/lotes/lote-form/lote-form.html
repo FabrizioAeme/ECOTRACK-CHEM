@@ -1,0 +1,99 @@
+<app-encabezado-pagina
+  [titulo]="esEdicion() ? 'Editar lote de producción' : 'Nuevo lote de producción'"
+  subtitulo="Registra la producción y el insumo químico principal utilizado"
+  icono="bi-box-seam"
+>
+  <a routerLink="/lotes" class="btn btn-light"><i class="bi bi-arrow-left me-1"></i>Volver al listado</a>
+</app-encabezado-pagina>
+
+<app-aviso-diseno />
+
+<form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card card-eco">
+        <div class="card-body p-4">
+          <h2 class="titulo-seccion">Datos del lote</h2>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="codigoLote" class="form-label">Código del lote <span class="text-danger">*</span></label>
+              <input id="codigoLote" class="form-control font-monospace" formControlName="codigoLote"
+                placeholder="Ej. LOT-2026-001" [class.is-invalid]="invalido('codigoLote')" />
+              <app-error-campo [control]="form.controls.codigoLote" />
+            </div>
+            <div class="col-md-6">
+              <label for="fechaFabricacion" class="form-label">Fecha de fabricación <span class="text-danger">*</span></label>
+              <input id="fechaFabricacion" type="date" class="form-control" formControlName="fechaFabricacion"
+                [max]="hoy" [class.is-invalid]="invalido('fechaFabricacion')" />
+              <app-error-campo [control]="form.controls.fechaFabricacion" />
+            </div>
+            <div class="col-md-6">
+              <label for="volumenProducido" class="form-label">Volumen producido <span class="text-danger">*</span></label>
+              <input id="volumenProducido" type="number" class="form-control" formControlName="volumenProducido"
+                min="0" step="0.01" placeholder="Ej. 1200" [class.is-invalid]="invalido('volumenProducido')" />
+              <app-error-campo [control]="form.controls.volumenProducido" />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Estado <span class="text-danger">*</span></label>
+              <app-selector-catalogo formControlName="estado" etiqueta="Estado del lote" [opciones]="estados"
+                [mostrarDescripcion]="true" [class.is-invalid]="invalido('estado')" />
+              <app-error-campo [control]="form.controls.estado" [mensajes]="{ required: 'Selecciona el estado del lote.' }" />
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <h2 class="titulo-seccion">Trazabilidad</h2>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="insumoId" class="form-label">Insumo químico principal <span class="text-danger">*</span></label>
+              <select id="insumoId" class="form-select" formControlName="insumoId" [class.is-invalid]="invalido('insumoId')">
+                <option [ngValue]="null" disabled>Selecciona un insumo</option>
+                @for (insumo of insumos(); track insumo.id) {
+                  <option [ngValue]="insumo.id">{{ insumo.nombre }} ({{ insumo.codigoCas }})</option>
+                }
+              </select>
+              <app-error-campo [control]="form.controls.insumoId" [mensajes]="{ required: 'Selecciona el insumo principal.' }" />
+            </div>
+            <div class="col-md-6">
+              <label for="usuarioId" class="form-label">Usuario que autoriza <span class="text-danger">*</span></label>
+              <select id="usuarioId" class="form-select" formControlName="usuarioId" [class.is-invalid]="invalido('usuarioId')">
+                <option [ngValue]="null" disabled>Selecciona un usuario</option>
+                @for (usuario of usuarios(); track usuario.id) {
+                  <option [ngValue]="usuario.id">{{ usuario.nombres }} {{ usuario.apellidos }}</option>
+                }
+              </select>
+              <app-error-campo [control]="form.controls.usuarioId" [mensajes]="{ required: 'Selecciona el responsable.' }" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-end gap-2 p-3">
+          <a routerLink="/lotes" class="btn btn-light">Cancelar</a>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-check-lg me-1"></i>{{ esEdicion() ? 'Guardar cambios' : 'Registrar lote' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card card-eco">
+        <div class="card-body">
+          <h2 class="h6 fw-bold"><i class="bi bi-diagram-3 me-2 text-success"></i>¿Qué es un lote?</h2>
+          <p class="small text-body-secondary">
+            Es el registro de una producción o síntesis. Une al <strong>insumo químico</strong> utilizado con el
+            <strong>usuario</strong> que la autoriza, y es el origen de los <strong>residuos</strong> que se generan.
+          </p>
+          <div class="d-flex align-items-center justify-content-between text-center small mt-3">
+            <div><i class="bi bi-eyedropper fs-4 text-success d-block"></i>Insumo</div>
+            <i class="bi bi-arrow-right text-body-secondary"></i>
+            <div><i class="bi bi-box-seam fs-4 text-info d-block"></i>Lote</div>
+            <i class="bi bi-arrow-right text-body-secondary"></i>
+            <div><i class="bi bi-recycle fs-4 text-warning d-block"></i>Residuo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
