@@ -1,0 +1,87 @@
+<app-encabezado-pagina
+  [titulo]="esEdicion() ? 'Editar residuo industrial' : 'Registrar residuo industrial'"
+  subtitulo="Indica el lote que lo generó y cuál será su disposición final"
+  icono="bi-recycle"
+>
+  <a routerLink="/residuos" class="btn btn-light"><i class="bi bi-arrow-left me-1"></i>Volver al listado</a>
+</app-encabezado-pagina>
+
+<app-aviso-diseno />
+
+<form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card card-eco">
+        <div class="card-body p-4">
+          <h2 class="titulo-seccion">Datos del residuo</h2>
+          <div class="row g-3">
+            <div class="col-md-7">
+              <label for="tipoResiduo" class="form-label">Tipo de residuo <span class="text-danger">*</span></label>
+              <input id="tipoResiduo" class="form-control" formControlName="tipoResiduo" list="tipos-sugeridos"
+                placeholder="Ej. Solvente gastado" [class.is-invalid]="invalido('tipoResiduo')" />
+              <datalist id="tipos-sugeridos">
+                @for (tipo of tiposSugeridos; track tipo) {
+                  <option [value]="tipo"></option>
+                }
+              </datalist>
+              <app-error-campo [control]="form.controls.tipoResiduo" />
+            </div>
+            <div class="col-md-5">
+              <label for="volumenLitros" class="form-label">Volumen <span class="text-danger">*</span></label>
+              <div class="input-group has-validation">
+                <input id="volumenLitros" type="number" class="form-control" formControlName="volumenLitros"
+                  min="0" step="0.01" placeholder="Ej. 35.5" [class.is-invalid]="invalido('volumenLitros')" />
+                <span class="input-group-text">litros</span>
+                <app-error-campo [control]="form.controls.volumenLitros" />
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="loteId" class="form-label">Lote de origen <span class="text-danger">*</span></label>
+              <select id="loteId" class="form-select" formControlName="loteId" [class.is-invalid]="invalido('loteId')">
+                <option [ngValue]="null" disabled>Selecciona el lote que generó el residuo</option>
+                @for (lote of lotes(); track lote.id) {
+                  <option [ngValue]="lote.id">{{ lote.codigoLote }} · {{ lote.insumoNombre }}</option>
+                }
+              </select>
+              <app-error-campo [control]="form.controls.loteId" [mensajes]="{ required: 'Selecciona el lote de origen.' }" />
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <h2 class="titulo-seccion">Disposición final</h2>
+          <app-selector-catalogo formControlName="disposicionFinal" etiqueta="Disposición final"
+            [opciones]="disposiciones" [mostrarDescripcion]="true" [class.is-invalid]="invalido('disposicionFinal')" />
+          <app-error-campo [control]="form.controls.disposicionFinal"
+            [mensajes]="{ required: 'Selecciona la disposición final del residuo.' }" />
+
+          <div class="form-check form-switch mt-4">
+            <input id="requiereCertificado" type="checkbox" role="switch" class="form-check-input"
+              formControlName="requiereCertificado" />
+            <label for="requiereCertificado" class="form-check-label fw-medium">Requiere certificado de disposición</label>
+            <div class="form-text">Actívalo si la empresa operadora debe emitir un certificado de manejo.</div>
+          </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-end gap-2 p-3">
+          <a routerLink="/residuos" class="btn btn-light">Cancelar</a>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-check-lg me-1"></i>{{ esEdicion() ? 'Guardar cambios' : 'Registrar residuo' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card card-eco">
+        <div class="card-body">
+          <h2 class="h6 fw-bold"><i class="bi bi-recycle me-2 text-success"></i>Economía circular</h2>
+          <p class="small text-body-secondary mb-0">
+            Elegir <strong>Reciclado / Reúso</strong> siempre que sea posible reduce el impacto ambiental de la
+            planta: el residuo vuelve a la cadena productiva en lugar de desecharse.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
