@@ -1,0 +1,74 @@
+<app-encabezado-pagina
+  titulo="Usuarios"
+  subtitulo="Operadores, auditores y administradores de la plataforma"
+  icono="bi-people"
+/>
+
+<app-aviso-diseno />
+
+<div class="alert alert-light border d-flex gap-2 small">
+  <i class="bi bi-info-circle text-success"></i>
+  <span>
+    Los nuevos usuarios se registran desde la pantalla <strong>Crear cuenta</strong> y reciben el rol
+    <strong>Operador de laboratorio</strong>.
+  </span>
+</div>
+
+<div class="card card-eco">
+  <div class="card-header py-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6 col-lg-5">
+        <app-barra-busqueda [(texto)]="busqueda" placeholder="Buscar por nombre o correo..." />
+      </div>
+      <div class="col-md-4 col-lg-3">
+        <select class="form-select" aria-label="Filtrar por rol" [(ngModel)]="filtroRol">
+          <option value="">Todos los roles</option>
+          @for (rol of roles; track rol.valor) {
+            <option [value]="rol.valor">{{ rol.etiqueta }}</option>
+          }
+        </select>
+      </div>
+      <div class="col text-md-end small text-body-secondary">
+        {{ usuariosFiltrados().length }} de {{ usuarios().length }} usuarios
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    @if (usuariosFiltrados().length === 0) {
+      <app-estado-vacio icono="bi-people" titulo="Sin resultados" mensaje="Ningún usuario coincide con la búsqueda." />
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 tabla-eco">
+          <thead>
+            <tr>
+              <th class="ps-3">Usuario</th>
+              <th>Correo</th>
+              <th class="pe-3">Rol</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (usuario of usuariosFiltrados(); track usuario.id) {
+              <tr>
+                <td class="ps-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold small"
+                      style="width: 36px; height: 36px; background: var(--eco-primario-claro); color: var(--eco-primario)">
+                      {{ iniciales(usuario) }}
+                    </span>
+                    <span class="fw-semibold">{{ usuario.nombres }} {{ usuario.apellidos }}</span>
+                    @if (usuario.correo === correoActual()) {
+                      <span class="badge text-bg-success">Tú</span>
+                    }
+                  </div>
+                </td>
+                <td class="text-body-secondary">{{ usuario.correo }}</td>
+                <td class="pe-3"><app-insignia [valor]="usuario.rol" [opciones]="roles" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

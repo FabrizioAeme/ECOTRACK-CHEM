@@ -1,0 +1,95 @@
+<app-encabezado-pagina
+  [titulo]="esEdicion() ? 'Editar insumo químico' : 'Registrar insumo químico'"
+  subtitulo="Completa la ficha técnica de la materia prima"
+  icono="bi-eyedropper"
+>
+  <a routerLink="/insumos" class="btn btn-light"><i class="bi bi-arrow-left me-1"></i>Volver al listado</a>
+</app-encabezado-pagina>
+
+<app-aviso-diseno />
+
+<form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card card-eco">
+        <div class="card-body p-4">
+          <h2 class="titulo-seccion">Identificación</h2>
+          <div class="row g-3">
+            <div class="col-md-5">
+              <label for="codigoCas" class="form-label">Código CAS <span class="text-danger">*</span></label>
+              <input id="codigoCas" class="form-control font-monospace" formControlName="codigoCas"
+                placeholder="Ej. 67-64-1" [class.is-invalid]="invalido('codigoCas')" />
+              <app-error-campo [control]="form.controls.codigoCas"
+                [mensajes]="{ pattern: 'Usa el formato NN-NN-N, por ejemplo 7732-18-5.' }" />
+              <div class="form-text">Identificador químico internacional.</div>
+            </div>
+            <div class="col-md-7">
+              <label for="nombre" class="form-label">Nombre del insumo <span class="text-danger">*</span></label>
+              <input id="nombre" class="form-control" formControlName="nombre" placeholder="Ej. Acetona industrial"
+                [class.is-invalid]="invalido('nombre')" />
+              <app-error-campo [control]="form.controls.nombre" />
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <h2 class="titulo-seccion">Características</h2>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="nivelPureza" class="form-label">Nivel de pureza <span class="text-danger">*</span></label>
+              <div class="input-group has-validation">
+                <input id="nivelPureza" type="number" class="form-control" formControlName="nivelPureza"
+                  min="0" max="100" step="0.01" placeholder="0 - 100" [class.is-invalid]="invalido('nivelPureza')" />
+                <span class="input-group-text">%</span>
+                <app-error-campo [control]="form.controls.nivelPureza" />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="stockDisponible" class="form-label">Stock disponible <span class="text-danger">*</span></label>
+              <input id="stockDisponible" type="number" class="form-control" formControlName="stockDisponible"
+                min="0" step="0.01" placeholder="Ej. 250" [class.is-invalid]="invalido('stockDisponible')" />
+              <app-error-campo [control]="form.controls.stockDisponible" />
+              <div class="form-text">Cantidad en almacén (kg o L).</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Nivel de peligrosidad <span class="text-danger">*</span></label>
+              <app-selector-catalogo formControlName="nivelPeligrosidad" etiqueta="Nivel de peligrosidad"
+                [opciones]="niveles" [mostrarDescripcion]="true" [class.is-invalid]="invalido('nivelPeligrosidad')" />
+              <app-error-campo [control]="form.controls.nivelPeligrosidad"
+                [mensajes]="{ required: 'Selecciona el nivel de peligrosidad.' }" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-end gap-2 p-3">
+          <a routerLink="/insumos" class="btn btn-light">Cancelar</a>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-check-lg me-1"></i>{{ esEdicion() ? 'Guardar cambios' : 'Registrar insumo' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card card-eco">
+        <div class="card-body">
+          <h2 class="h6 fw-bold"><i class="bi bi-info-circle me-2 text-success"></i>¿Qué es el código CAS?</h2>
+          <p class="small text-body-secondary">
+            Es el número único que el Chemical Abstracts Service asigna a cada sustancia química.
+            Por ejemplo, el agua es <span class="codigo">7732-18-5</span> y la acetona
+            <span class="codigo">67-64-1</span>.
+          </p>
+          <h2 class="h6 fw-bold mt-4">Niveles de peligrosidad</h2>
+          <ul class="list-unstyled small mb-0">
+            @for (nivel of niveles; track nivel.valor) {
+              <li class="d-flex align-items-center gap-2 mb-2">
+                <app-insignia [valor]="nivel.valor" [opciones]="niveles" />
+                <span class="text-body-secondary">{{ nivel.descripcion }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
