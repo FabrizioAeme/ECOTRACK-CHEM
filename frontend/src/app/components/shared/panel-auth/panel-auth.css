@@ -1,0 +1,47 @@
+.auth-pagina {
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-hero {
+  flex: 0 0 44%;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3rem;
+  color: #e3f3ec;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(43, 182, 115, 0.35), transparent 45%),
+    linear-gradient(160deg, #0f3b35 0%, #0b2e29 60%, #12503f 100%);
+}
+
+.auth-beneficios li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.auth-beneficios .bi {
+  width: 38px;
+  height: 38px;
+  border-radius: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: #7ee2b0;
+  font-size: 1.1rem;
+}
+
+.auth-contenido {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.auth-tarjeta {
+  width: 100%;
+  max-width: 440px;
+}
