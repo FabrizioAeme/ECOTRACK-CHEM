@@ -1,0 +1,67 @@
+<app-panel-auth>
+  <h2 class="h3 fw-bold mb-1">Crear cuenta</h2>
+  <p class="text-body-secondary mb-4">Regístrate para empezar a trazar los insumos de tu planta.</p>
+
+  <app-aviso-diseno
+    mensaje="Vista de diseño: la creación de cuentas se habilitará en la siguiente entrega. Para ingresar usa una cuenta ya registrada."
+  />
+
+  <form [formGroup]="form" (ngSubmit)="registrar()" novalidate>
+    <div class="row g-3 mb-3">
+      <div class="col-sm-6">
+        <label for="nombres" class="form-label">Nombres</label>
+        <input id="nombres" class="form-control" formControlName="nombres" placeholder="Ana" autocomplete="given-name"
+          [class.is-invalid]="invalido('nombres')" />
+        <app-error-campo [control]="form.controls.nombres" />
+      </div>
+      <div class="col-sm-6">
+        <label for="apellidos" class="form-label">Apellidos</label>
+        <input id="apellidos" class="form-control" formControlName="apellidos" placeholder="Torres" autocomplete="family-name"
+          [class.is-invalid]="invalido('apellidos')" />
+        <app-error-campo [control]="form.controls.apellidos" />
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="correo" class="form-label">Correo electrónico</label>
+      <input id="correo" type="email" class="form-control" formControlName="correo" placeholder="nombre@empresa.com"
+        autocomplete="email" [class.is-invalid]="invalido('correo')" />
+      <app-error-campo [control]="form.controls.correo" />
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-sm-6">
+        <label for="clave" class="form-label">Contraseña</label>
+        <input id="clave" class="form-control" formControlName="clave" autocomplete="new-password"
+          [type]="mostrarClave() ? 'text' : 'password'" [class.is-invalid]="invalido('clave')" />
+        <app-error-campo [control]="form.controls.clave" />
+      </div>
+      <div class="col-sm-6">
+        <label for="confirmarClave" class="form-label">Confirmar contraseña</label>
+        <input id="confirmarClave" class="form-control" formControlName="confirmarClave" autocomplete="new-password"
+          [type]="mostrarClave() ? 'text' : 'password'" [class.is-invalid]="invalido('confirmarClave')" />
+        <app-error-campo [control]="form.controls.confirmarClave" />
+      </div>
+    </div>
+
+    <div class="form-check mb-3">
+      <input id="mostrarClave" type="checkbox" class="form-check-input" [checked]="mostrarClave()"
+        (change)="mostrarClave.set(!mostrarClave())" />
+      <label for="mostrarClave" class="form-check-label small">Mostrar contraseñas</label>
+    </div>
+
+    <div class="alert alert-light border small d-flex gap-2 mb-4">
+      <i class="bi bi-info-circle text-success"></i>
+      <span>Las cuentas nuevas se crean con el rol <strong>Operador de laboratorio</strong>.</span>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+      <i class="bi bi-person-plus me-2"></i>Crear cuenta
+    </button>
+  </form>
+
+  <p class="text-center text-body-secondary mt-4 mb-0">
+    ¿Ya tienes una cuenta?
+    <a routerLink="/login" class="fw-semibold text-decoration-none">Inicia sesión</a>
+  </p>
+</app-panel-auth>
