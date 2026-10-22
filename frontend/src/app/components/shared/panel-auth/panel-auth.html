@@ -1,0 +1,32 @@
+<div class="auth-pagina">
+  <section class="auth-hero d-none d-lg-flex">
+    <app-logo [tamano]="44" [claro]="true" />
+
+    <div>
+      <h1 class="display-6 fw-bold mb-3">Trazabilidad química<br />responsable</h1>
+      <p class="lead mb-4">
+        Registra tus insumos, controla los lotes de producción y audita los residuos que genera tu
+        planta, todo en un solo lugar.
+      </p>
+      <ul class="list-unstyled auth-beneficios">
+        <li><i class="bi bi-eyedropper"></i>Insumos químicos identificados por código CAS</li>
+        <li><i class="bi bi-box-seam"></i>Lotes de producción trazables de inicio a fin</li>
+        <li><i class="bi bi-recycle"></i>Gestión responsable de residuos industriales</li>
+      </ul>
+    </div>
+
+    <div class="small text-white-50">
+      <i class="bi bi-globe-americas me-1"></i>
+      Aporta al ODS 9 · Industria, innovación e infraestructura
+    </div>
+  </section>
+
+  <main class="auth-contenido">
+    <div class="auth-tarjeta">
+      <div class="d-lg-none mb-4">
+        <app-logo [tamano]="40" />
+      </div>
+      <ng-content />
+    </div>
+  </main>
+</div>
