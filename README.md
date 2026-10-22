@@ -1,4 +1,4 @@
->>>>> EcoTrack Chem - Backend 
+>>>>> EcoTrack Chem 
 
 Proyecto Integrador (T1) — Sistema de trazabilidad química y gestión de residuos para pymes industriales.
 
