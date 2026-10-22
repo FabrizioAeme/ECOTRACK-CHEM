@@ -20,6 +20,7 @@ export const routes: Routes = [
       { path: 'insumos', loadChildren: () => import('./components/insumos/insumos.routes').then((m) => m.INSUMOS_ROUTES) },
       { path: 'lotes', loadChildren: () => import('./components/lotes/lotes.routes').then((m) => m.LOTES_ROUTES) },
       { path: 'residuos', loadChildren: () => import('./components/residuos/residuos.routes').then((m) => m.RESIDUOS_ROUTES) },
+      { path: 'usuarios', loadChildren: () => import('./components/usuarios/usuarios.routes').then((m) => m.USUARIOS_ROUTES) },
     ],
   },
 
