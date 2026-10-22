@@ -17,6 +17,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: Dashboard, title: 'Panel de control | EcoTrack Chem' },
+      { path: 'insumos', loadChildren: () => import('./components/insumos/insumos.routes').then((m) => m.INSUMOS_ROUTES) },
     ],
   },
 
