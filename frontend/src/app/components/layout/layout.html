@@ -1,0 +1,63 @@
+<div class="app-shell">
+  <aside class="sidebar" [class.abierto]="menuAbierto()">
+    <div class="sidebar-marca">
+      <app-logo [tamano]="36" [claro]="true" />
+      <button type="button" class="btn btn-sm text-white d-lg-none" aria-label="Cerrar menú" (click)="menuAbierto.set(false)">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Menú principal">
+      @for (seccion of secciones; track seccion.titulo) {
+        <div class="sidebar-seccion">{{ seccion.titulo }}</div>
+        @for (item of seccion.items; track item.ruta) {
+          <a class="sidebar-link" [routerLink]="item.ruta" routerLinkActive="activo" (click)="menuAbierto.set(false)">
+            <i class="bi" [class]="item.icono"></i>
+            <span>{{ item.etiqueta }}</span>
+          </a>
+        }
+      }
+    </nav>
+
+    <div class="sidebar-ods">
+      <i class="bi bi-globe-americas"></i>
+      <div>
+        <strong>ODS 9</strong><br />
+        Industria, innovación e infraestructura
+      </div>
+    </div>
+  </aside>
+
+  @if (menuAbierto()) {
+    <div class="sidebar-fondo d-lg-none" (click)="menuAbierto.set(false)"></div>
+  }
+
+  <div class="contenido">
+    <header class="topbar">
+      <button type="button" class="btn btn-light d-lg-none" aria-label="Abrir menú" (click)="menuAbierto.set(true)">
+        <i class="bi bi-list fs-5"></i>
+      </button>
+      <span class="d-none d-md-inline text-body-secondary small">
+        <i class="bi bi-calendar-event me-1"></i><span class="fecha">{{ hoy | date: 'fullDate' }}</span>
+      </span>
+
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2">
+          <span class="avatar">{{ inicial() }}</span>
+          <div class="lh-sm d-none d-sm-block">
+            <div class="small text-body-secondary">Sesión iniciada como</div>
+            <div class="small fw-semibold">{{ correo() }}</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-danger btn-sm" (click)="cerrarSesion()">
+          <i class="bi bi-box-arrow-right"></i>
+          <span class="d-none d-sm-inline ms-1">Cerrar sesión</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="p-3 p-lg-4">
+      <router-outlet />
+    </main>
+  </div>
+</div>

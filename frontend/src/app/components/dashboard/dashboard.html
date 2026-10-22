@@ -1,0 +1,108 @@
+<app-encabezado-pagina
+  titulo="Panel de control"
+  subtitulo="Resumen de la trazabilidad química de tu planta"
+  icono="bi-speedometer2"
+>
+  <a routerLink="/lotes/nuevo" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuevo lote</a>
+  <a routerLink="/residuos/nuevo" class="btn btn-outline-primary"><i class="bi bi-recycle me-1"></i>Registrar residuo</a>
+</app-encabezado-pagina>
+
+<app-aviso-diseno />
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <app-tarjeta-indicador titulo="Insumos" [valor]="insumos().length" icono="bi-eyedropper"
+      color="success" [detalle]="insumosPeligrosos() + ' con algún nivel de peligro'" />
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <app-tarjeta-indicador titulo="Lotes" [valor]="lotes().length" icono="bi-box-seam"
+      color="info" [detalle]="lotesEnProceso() + ' en proceso'" />
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <app-tarjeta-indicador titulo="Residuos generados" [valor]="(volumenResiduos() | number: '1.0-2') + ' L'"
+      icono="bi-droplet-half" color="warning" [detalle]="pluralizar(residuos().length, 'registro', 'registros')" />
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <app-tarjeta-indicador titulo="Requieren certificado" [valor]="residuosConCertificado()"
+      icono="bi-file-earmark-check" color="danger" [detalle]="'de ' + pluralizar(residuos().length, 'residuo', 'residuos')" />
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-7">
+    <div class="card card-eco h-100">
+      <div class="card-header d-flex align-items-center justify-content-between py-3">
+        <h2 class="h6 fw-bold mb-0"><i class="bi bi-clock-history me-2 text-success"></i>Últimos lotes de producción</h2>
+        <a routerLink="/lotes" class="small text-decoration-none">Ver todos</a>
+      </div>
+      <div class="card-body p-0">
+        @if (ultimosLotes().length === 0) {
+          <p class="text-body-secondary text-center py-5 mb-0">Aún no hay lotes registrados.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 tabla-eco">
+              <thead>
+                <tr>
+                  <th class="ps-3">Código</th>
+                  <th>Fecha</th>
+                  <th>Insumo</th>
+                  <th class="pe-3">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (lote of ultimosLotes(); track lote.id) {
+                  <tr>
+                    <td class="ps-3"><span class="codigo">{{ lote.codigoLote }}</span></td>
+                    <td class="text-nowrap">{{ lote.fechaFabricacion | date: 'dd/MM/yyyy' }}</td>
+                    <td>{{ lote.insumoNombre }}</td>
+                    <td class="pe-3"><app-insignia [valor]="lote.estado" [opciones]="estadosLote" /></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="card card-eco mb-4">
+      <div class="card-body">
+        <h2 class="h6 fw-bold mb-1"><i class="bi bi-recycle me-2 text-success"></i>Destino de los residuos</h2>
+        <p class="small text-body-secondary mb-3">
+          El <strong class="text-success">{{ porcentajeCircular() | number: '1.0-0' }}%</strong>
+          del volumen vuelve a la cadena productiva (economía circular).
+        </p>
+        @for (d of porDisposicion(); track d.opcion.valor) {
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small mb-1">
+              <span><i class="bi me-1" [class]="d.opcion.icono"></i>{{ d.opcion.etiqueta }}</span>
+              <span class="text-body-secondary">{{ d.volumen | number: '1.0-2' }} L</span>
+            </div>
+            <div class="progress" role="progressbar" [attr.aria-label]="d.opcion.etiqueta"
+              [attr.aria-valuenow]="d.porcentaje" aria-valuemin="0" aria-valuemax="100" style="height: 8px">
+              <div class="progress-bar" [class]="'bg-' + d.opcion.color" [style.width.%]="d.porcentaje"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="card card-eco">
+      <div class="card-body">
+        <h2 class="h6 fw-bold mb-3"><i class="bi bi-exclamation-triangle me-2 text-warning"></i>Insumos por peligrosidad</h2>
+        @for (p of porPeligrosidad(); track p.opcion.valor) {
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div style="width: 120px"><app-insignia [valor]="p.opcion.valor" [opciones]="[p.opcion]" /></div>
+            <div class="progress flex-grow-1" role="progressbar" [attr.aria-label]="p.opcion.etiqueta"
+              [attr.aria-valuenow]="p.porcentaje" aria-valuemin="0" aria-valuemax="100" style="height: 8px">
+              <div class="progress-bar" [class]="'bg-' + p.opcion.color" [style.width.%]="p.porcentaje"></div>
+            </div>
+            <span class="small fw-semibold text-end" style="width: 24px">{{ p.cantidad }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
