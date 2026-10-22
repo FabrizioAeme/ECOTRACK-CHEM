@@ -1,0 +1,89 @@
+<app-encabezado-pagina
+  titulo="Insumos químicos"
+  subtitulo="Materias primas identificadas por su código CAS"
+  icono="bi-eyedropper"
+>
+  <a routerLink="nuevo" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuevo insumo</a>
+</app-encabezado-pagina>
+
+<app-aviso-diseno />
+
+<div class="card card-eco">
+  <div class="card-header py-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6 col-lg-5">
+        <app-barra-busqueda [(texto)]="busqueda" placeholder="Buscar por nombre o código CAS..." />
+      </div>
+      <div class="col-md-4 col-lg-3">
+        <select class="form-select" aria-label="Filtrar por peligrosidad" [(ngModel)]="filtroPeligrosidad">
+          <option value="">Todas las peligrosidades</option>
+          @for (nivel of niveles; track nivel.valor) {
+            <option [value]="nivel.valor">{{ nivel.etiqueta }}</option>
+          }
+        </select>
+      </div>
+      <div class="col text-md-end small text-body-secondary">
+        {{ insumosFiltrados().length }} de {{ insumos().length }} insumos
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    @if (insumos().length === 0) {
+      <app-estado-vacio
+        icono="bi-eyedropper"
+        titulo="Aún no hay insumos registrados"
+        mensaje="Registra tu primera materia prima para empezar a trazar tus lotes."
+      >
+        <a routerLink="nuevo" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Registrar insumo</a>
+      </app-estado-vacio>
+    } @else if (insumosFiltrados().length === 0) {
+      <app-estado-vacio icono="bi-search" titulo="Sin resultados" mensaje="Ningún insumo coincide con los filtros aplicados.">
+        <button type="button" class="btn btn-light" (click)="limpiarFiltros()">Limpiar filtros</button>
+      </app-estado-vacio>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 tabla-eco">
+          <thead>
+            <tr>
+              <th class="ps-3">Código CAS</th>
+              <th>Nombre</th>
+              <th class="text-end">Pureza</th>
+              <th>Peligrosidad</th>
+              <th class="text-end">Stock disponible</th>
+              <th class="text-end pe-3">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (insumo of insumosFiltrados(); track insumo.id) {
+              <tr>
+                <td class="ps-3"><span class="codigo">{{ insumo.codigoCas }}</span></td>
+                <td class="fw-semibold">{{ insumo.nombre }}</td>
+                <td class="text-end">{{ insumo.nivelPureza | number: '1.0-2' }} %</td>
+                <td><app-insignia [valor]="insumo.nivelPeligrosidad" [opciones]="niveles" /></td>
+                <td class="text-end">{{ insumo.stockDisponible | number: '1.0-2' }}</td>
+                <td class="text-end text-nowrap pe-3">
+                  <a [routerLink]="[insumo.id, 'editar']" class="btn btn-sm btn-light" title="Editar" aria-label="Editar">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+                  <button type="button" class="btn btn-sm btn-light text-danger ms-1" title="Eliminar" aria-label="Eliminar"
+                    (click)="insumoAEliminar.set(insumo)">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<app-dialogo-confirmacion
+  [abierto]="!!insumoAEliminar()"
+  titulo="¿Eliminar insumo?"
+  [mensaje]="'Se eliminará «' + insumoAEliminar()?.nombre + '». Esta acción no se puede deshacer.'"
+  (confirmar)="confirmarEliminacion()"
+  (cancelar)="cerrarDialogo()"
+/>
