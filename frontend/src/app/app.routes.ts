@@ -19,6 +19,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: Dashboard, title: 'Panel de control | EcoTrack Chem' },
       { path: 'insumos', loadChildren: () => import('./components/insumos/insumos.routes').then((m) => m.INSUMOS_ROUTES) },
       { path: 'lotes', loadChildren: () => import('./components/lotes/lotes.routes').then((m) => m.LOTES_ROUTES) },
+      { path: 'residuos', loadChildren: () => import('./components/residuos/residuos.routes').then((m) => m.RESIDUOS_ROUTES) },
     ],
   },
 

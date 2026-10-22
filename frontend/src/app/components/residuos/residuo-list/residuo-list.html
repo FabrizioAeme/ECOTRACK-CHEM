@@ -1,0 +1,95 @@
+<app-encabezado-pagina
+  titulo="Residuos industriales"
+  subtitulo="Subproductos generados por cada lote y su disposición final"
+  icono="bi-recycle"
+>
+  <a routerLink="nuevo" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Registrar residuo</a>
+</app-encabezado-pagina>
+
+<app-aviso-diseno />
+
+<div class="card card-eco">
+  <div class="card-header py-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6 col-lg-5">
+        <app-barra-busqueda [(texto)]="busqueda" placeholder="Buscar por tipo de residuo o lote..." />
+      </div>
+      <div class="col-md-4 col-lg-3">
+        <select class="form-select" aria-label="Filtrar por disposición final" [(ngModel)]="filtroDisposicion">
+          <option value="">Todas las disposiciones</option>
+          @for (disposicion of disposiciones; track disposicion.valor) {
+            <option [value]="disposicion.valor">{{ disposicion.etiqueta }}</option>
+          }
+        </select>
+      </div>
+      <div class="col text-md-end small text-body-secondary">
+        {{ pluralizar(residuosFiltrados().length, 'registro', 'registros') }} · {{ volumenFiltrado() | number: '1.0-2' }} L
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    @if (residuos().length === 0) {
+      <app-estado-vacio
+        icono="bi-recycle"
+        titulo="Aún no hay residuos registrados"
+        mensaje="Registra los residuos que genera cada lote para auditar su disposición final."
+      >
+        <a routerLink="nuevo" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Registrar residuo</a>
+      </app-estado-vacio>
+    } @else if (residuosFiltrados().length === 0) {
+      <app-estado-vacio icono="bi-search" titulo="Sin resultados" mensaje="Ningún residuo coincide con los filtros aplicados.">
+        <button type="button" class="btn btn-light" (click)="limpiarFiltros()">Limpiar filtros</button>
+      </app-estado-vacio>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 tabla-eco">
+          <thead>
+            <tr>
+              <th class="ps-3">Tipo de residuo</th>
+              <th>Lote de origen</th>
+              <th class="text-end">Volumen</th>
+              <th>Disposición final</th>
+              <th>Certificado</th>
+              <th class="text-end pe-3">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (residuo of residuosFiltrados(); track residuo.id) {
+              <tr>
+                <td class="ps-3 fw-semibold">{{ residuo.tipoResiduo }}</td>
+                <td><span class="codigo">{{ residuo.loteCodigo }}</span></td>
+                <td class="text-end text-nowrap">{{ residuo.volumenLitros | number: '1.0-2' }} L</td>
+                <td><app-insignia [valor]="residuo.disposicionFinal" [opciones]="disposiciones" /></td>
+                <td>
+                  @if (residuo.requiereCertificado) {
+                    <span class="text-danger small fw-semibold"><i class="bi bi-file-earmark-check me-1"></i>Requerido</span>
+                  } @else {
+                    <span class="text-body-secondary small">No requerido</span>
+                  }
+                </td>
+                <td class="text-end text-nowrap pe-3">
+                  <a [routerLink]="[residuo.id, 'editar']" class="btn btn-sm btn-light" title="Editar" aria-label="Editar">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+                  <button type="button" class="btn btn-sm btn-light text-danger ms-1" title="Eliminar" aria-label="Eliminar"
+                    (click)="residuoAEliminar.set(residuo)">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<app-dialogo-confirmacion
+  [abierto]="!!residuoAEliminar()"
+  titulo="¿Eliminar residuo?"
+  [mensaje]="'Se eliminará el registro «' + residuoAEliminar()?.tipoResiduo + '». Esta acción no se puede deshacer.'"
+  (confirmar)="confirmarEliminacion()"
+  (cancelar)="cerrarDialogo()"
+/>
