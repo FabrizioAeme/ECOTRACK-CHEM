@@ -1,26 +1,30 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { USUARIOS_EJEMPLO } from '../../../data/datos-ejemplo';
 import { RolUsuario, ROLES_USUARIO, Usuario } from '../../../models/usuario.interface';
 import { AuthService } from '../../../services/auth.service';
+import { UsuarioService } from '../../../services/usuario.service';
+import { obtenerMensajeError } from '../../../utils/http-error';
 import { normalizarTexto } from '../../../utils/texto';
-import { AvisoDiseno } from '../../shared/aviso-diseno/aviso-diseno';
 import { BarraBusqueda } from '../../shared/barra-busqueda/barra-busqueda';
 import { EncabezadoPagina } from '../../shared/encabezado-pagina/encabezado-pagina';
 import { EstadoVacio } from '../../shared/estado-vacio/estado-vacio';
+import { IndicadorCarga } from '../../shared/indicador-carga/indicador-carga';
 import { Insignia } from '../../shared/insignia/insignia';
 
 @Component({
   selector: 'app-usuario-list',
-  imports: [FormsModule, EncabezadoPagina, AvisoDiseno, BarraBusqueda, EstadoVacio, Insignia],
+  imports: [FormsModule, EncabezadoPagina, BarraBusqueda, EstadoVacio, Insignia, IndicadorCarga],
   templateUrl: './usuario-list.html',
 })
-export class UsuarioList {
+export class UsuarioList implements OnInit {
+  private usuarioService = inject(UsuarioService);
   readonly correoActual = inject(AuthService).correoUsuario;
 
   readonly roles = ROLES_USUARIO;
 
-  readonly usuarios = signal<Usuario[]>(USUARIOS_EJEMPLO);
+  readonly usuarios = signal<Usuario[]>([]);
+  readonly cargando = signal(true);
+  readonly error = signal('');
 
   readonly busqueda = signal('');
   readonly filtroRol = signal<RolUsuario | ''>('');
@@ -36,6 +40,25 @@ export class UsuarioList {
           normalizarTexto(u.correo).includes(texto)),
     );
   });
+
+  ngOnInit() {
+    this.cargar();
+  }
+
+  cargar() {
+    this.cargando.set(true);
+    this.error.set('');
+    this.usuarioService.listar().subscribe({
+      next: (usuarios) => {
+        this.usuarios.set(usuarios);
+        this.cargando.set(false);
+      },
+      error: (err) => {
+        this.error.set(obtenerMensajeError(err, 'No se pudo cargar la lista de usuarios.'));
+        this.cargando.set(false);
+      },
+    });
+  }
 
   iniciales(usuario: Usuario): string {
     return `${usuario.nombres.charAt(0)}${usuario.apellidos.charAt(0)}`.toUpperCase();

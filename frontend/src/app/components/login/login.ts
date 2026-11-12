@@ -21,6 +21,7 @@ export class Login implements OnInit {
 
   readonly correo = input<string>();
   readonly returnUrl = input<string>();
+  readonly expirada = input<string>();
 
   readonly form = this.fb.nonNullable.group({
     correo: ['', [Validators.required, Validators.email]],
@@ -35,6 +36,9 @@ export class Login implements OnInit {
     const correo = this.correo();
     if (correo) {
       this.form.controls.correo.setValue(correo);
+    }
+    if (this.expirada() === 'true') {
+      this.error.set('Tu sesión expiró. Vuelve a iniciar sesión para continuar.');
     }
   }
 
