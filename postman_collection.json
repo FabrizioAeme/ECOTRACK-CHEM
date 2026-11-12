@@ -1,20 +1,44 @@
 {
   "info": {
-    "name": "EcoTrack Chem - Backend T1",
-    "description": "Coleccion de pruebas para el backend de EcoTrack Chem: autenticacion JWT y CRUD de Usuarios, Insumos Quimicos, Lotes y Residuos Industriales.",
+    "name": "EcoTrack Chem - Backend T3",
+    "description": "Pruebas de la API de EcoTrack Chem (T3): login JWT, endpoints protegidos, roles, paginacion, reglas de negocio y errores 400/401/403/404/409. Ejecuta primero \"Auth > Login (obtener JWT)\". La documentacion interactiva esta en {{base_url}}/swagger-ui.html",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:8080" },
-    { "key": "access_token", "value": "" },
-    { "key": "insumo_id", "value": "1" },
-    { "key": "lote_id", "value": "1" },
-    { "key": "residuo_id", "value": "1" },
-    { "key": "usuario_id", "value": "1" }
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "insumo_id",
+      "value": "1"
+    },
+    {
+      "key": "lote_id",
+      "value": "1"
+    },
+    {
+      "key": "residuo_id",
+      "value": "1"
+    },
+    {
+      "key": "usuario_id",
+      "value": "1"
+    }
   ],
   "auth": {
     "type": "bearer",
-    "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
   },
   "item": [
     {
@@ -24,14 +48,31 @@
           "name": "Registrar usuario",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "auth": { "type": "noauth" },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
             "url": "{{base_url}}/auth/register",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nombres\": \"Ana\",\n  \"apellidos\": \"Torres\",\n  \"correo\": \"ana.torres@ecotrackchem.com\",\n  \"clave\": \"password123\"\n}"
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 cuenta creada o 409 si ya existe', () => pm.expect([201, 409]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Login (obtener JWT)",
@@ -48,29 +89,149 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "auth": { "type": "noauth" },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
             "url": "{{base_url}}/auth/authenticate",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"correo\": \"admin@ecotrackchem.com\",\n  \"clave\": \"password123\"\n}"
             }
           }
+        },
+        {
+          "name": "Login con clave incorrecta (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/authenticate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@ecotrackchem.com\",\n  \"clave\": \"incorrecta\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Endpoint protegido sin token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/insumos",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 401 en JSON', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().status).to.eql(401); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
       "name": "Usuarios",
       "item": [
-        { "name": "Listar usuarios", "request": { "method": "GET", "url": "{{base_url}}/api/v1/usuarios" } },
-        { "name": "Ver usuario por id", "request": { "method": "GET", "url": "{{base_url}}/api/v1/usuarios/{{usuario_id}}" } }
+        {
+          "name": "Mi perfil (/me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/usuarios/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('usuario_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/usuarios"
+          }
+        },
+        {
+          "name": "Ver usuario por id",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/usuarios/{{usuario_id}}"
+          }
+        }
       ]
     },
     {
       "name": "Insumos Quimicos",
       "item": [
-        { "name": "Listar insumos", "request": { "method": "GET", "url": "{{base_url}}/api/v1/insumos" } },
-        { "name": "Ver insumo por id", "request": { "method": "GET", "url": "{{base_url}}/api/v1/insumos/{{insumo_id}}" } },
+        {
+          "name": "Listar insumos",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/insumos"
+          }
+        },
+        {
+          "name": "Listar insumos paginado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/insumos/paginado?pagina=0&tamanio=5&ordenarPor=nombre&direccion=asc&buscar=&nivelPeligrosidad="
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('trae contenido y metadatos de paginacion', () => { const p = pm.response.json(); pm.expect(p).to.have.property('contenido'); pm.expect(p).to.have.property('totalElementos'); pm.expect(p).to.have.property('totalPaginas'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver insumo por id",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/insumos/{{insumo_id}}"
+          }
+        },
         {
           "name": "Crear insumo",
           "event": [
@@ -86,7 +247,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/api/v1/insumos",
             "body": {
               "mode": "raw",
@@ -98,7 +264,12 @@
           "name": "Actualizar insumo",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/api/v1/insumos/{{insumo_id}}",
             "body": {
               "mode": "raw",
@@ -106,14 +277,96 @@
             }
           }
         },
-        { "name": "Eliminar insumo", "request": { "method": "DELETE", "url": "{{base_url}}/api/v1/insumos/{{insumo_id}}" } }
+        {
+          "name": "Eliminar insumo",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/v1/insumos/{{insumo_id}}"
+          }
+        },
+        {
+          "name": "Paginacion invalida (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/insumos/paginado?tamanio=500"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Codigo CAS duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/insumos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigoCas\": \"7732-18-5\",\n  \"nombre\": \"Agua repetida\",\n  \"nivelPureza\": 99,\n  \"nivelPeligrosidad\": \"NEUTRO\",\n  \"stockDisponible\": 10\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        }
       ]
     },
     {
       "name": "Lotes",
       "item": [
-        { "name": "Listar lotes", "request": { "method": "GET", "url": "{{base_url}}/api/v1/lotes" } },
-        { "name": "Ver lote por id", "request": { "method": "GET", "url": "{{base_url}}/api/v1/lotes/{{lote_id}}" } },
+        {
+          "name": "Listar lotes",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/lotes"
+          }
+        },
+        {
+          "name": "Listar lotes paginado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/lotes/paginado?pagina=0&tamanio=5&ordenarPor=fechaFabricacion&direccion=asc&buscar=&estado="
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('trae contenido y metadatos de paginacion', () => { const p = pm.response.json(); pm.expect(p).to.have.property('contenido'); pm.expect(p).to.have.property('totalElementos'); pm.expect(p).to.have.property('totalPaginas'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver lote por id",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/lotes/{{lote_id}}"
+          }
+        },
         {
           "name": "Crear lote",
           "event": [
@@ -129,7 +382,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/api/v1/lotes",
             "body": {
               "mode": "raw",
@@ -141,7 +399,12 @@
           "name": "Actualizar lote",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/api/v1/lotes/{{lote_id}}",
             "body": {
               "mode": "raw",
@@ -149,14 +412,78 @@
             }
           }
         },
-        { "name": "Eliminar lote", "request": { "method": "DELETE", "url": "{{base_url}}/api/v1/lotes/{{lote_id}}" } }
+        {
+          "name": "Eliminar lote",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/v1/lotes/{{lote_id}}"
+          }
+        },
+        {
+          "name": "Lote nuevo como AUDITADO (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/lotes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigoLote\": \"LOT-AUD-POSTMAN\",\n  \"fechaFabricacion\": \"2026-11-01\",\n  \"volumenProducido\": 100,\n  \"estado\": \"AUDITADO\",\n  \"usuarioId\": {{usuario_id}},\n  \"insumoId\": {{insumo_id}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        }
       ]
     },
     {
       "name": "Residuos Industriales",
       "item": [
-        { "name": "Listar residuos", "request": { "method": "GET", "url": "{{base_url}}/api/v1/residuos" } },
-        { "name": "Ver residuo por id", "request": { "method": "GET", "url": "{{base_url}}/api/v1/residuos/{{residuo_id}}" } },
+        {
+          "name": "Listar residuos",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/residuos"
+          }
+        },
+        {
+          "name": "Listar residuos paginado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/residuos/paginado?pagina=0&tamanio=5&ordenarPor=id&direccion=asc&buscar=&disposicionFinal="
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('trae contenido y metadatos de paginacion', () => { const p = pm.response.json(); pm.expect(p).to.have.property('contenido'); pm.expect(p).to.have.property('totalElementos'); pm.expect(p).to.have.property('totalPaginas'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver residuo por id",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/residuos/{{residuo_id}}"
+          }
+        },
         {
           "name": "Crear residuo",
           "event": [
@@ -172,7 +499,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/api/v1/residuos",
             "body": {
               "mode": "raw",
@@ -184,7 +516,12 @@
           "name": "Actualizar residuo",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/api/v1/residuos/{{residuo_id}}",
             "body": {
               "mode": "raw",
@@ -192,7 +529,40 @@
             }
           }
         },
-        { "name": "Eliminar residuo", "request": { "method": "DELETE", "url": "{{base_url}}/api/v1/residuos/{{residuo_id}}" } }
+        {
+          "name": "Eliminar residuo",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/v1/residuos/{{residuo_id}}"
+          }
+        },
+        {
+          "name": "Recogida especial sin certificado (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/residuos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoResiduo\": \"Lodo quimico\",\n  \"volumenLitros\": 20,\n  \"disposicionFinal\": \"RECOGIDA_ESPECIAL\",\n  \"requiereCertificado\": false,\n  \"loteId\": {{lote_id}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('responde 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
       ]
     }
   ]

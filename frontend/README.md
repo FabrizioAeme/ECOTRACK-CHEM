@@ -1,23 +1,41 @@
 # EcoTrack Chem - Frontend
 
-Proyecto Integrador (T2) — Interfaz web de **EcoTrack Chem**, sistema de trazabilidad química y
+Proyecto Integrador (T3) — Interfaz web de **EcoTrack Chem**, sistema de trazabilidad química y
 gestión de residuos para pymes industriales. Aporta al **ODS 9** (Industria, innovación e infraestructura).
 
-## Alcance de esta entrega
+## Alcance de esta entrega (T3)
 
-| Pantalla | Estado |
+Todas las pantallas consumen la API real del backend con JWT; ya no hay datos de ejemplo.
+
+| Pantalla | Funcionalidad |
 |---|---|
-| Inicio de sesión | **Funcional**: se conecta al backend (`POST /auth/authenticate`), guarda el JWT y protege las rutas privadas |
-| Cierre de sesión | **Funcional** |
-| Registro de cuenta | Diseño (formulario con validaciones, sin conexión) |
-| Panel de control | Diseño con datos de ejemplo |
-| Insumos químicos | Diseño: listado, búsqueda, filtros y formulario de registro/edición |
-| Lotes de producción | Diseño: listado, búsqueda, filtros y formulario de registro/edición |
-| Residuos industriales | Diseño: listado, búsqueda, filtros y formulario de registro/edición |
-| Usuarios | Diseño: listado con búsqueda y filtro por rol |
+| Inicio de sesión | `POST /auth/authenticate`, guarda el JWT y lee el rol del usuario |
+| Registro | `POST /auth/register` con validaciones (clave con letras y números) y mensajes del servidor |
+| Cierre de sesión | Manual, automático al vencer el token y ante cualquier respuesta 401 |
+| Panel de control | Indicadores calculados con los datos reales de insumos, lotes y residuos |
+| Insumos / Lotes / Residuos | Listado **paginado del lado del servidor** con búsqueda, filtro, tamaño de página; registro, edición y eliminación |
+| Usuarios | Solo para `ADMINISTRADOR` (protegida con `rolGuard` y por el backend) |
 
-Las pantallas de diseño muestran datos de ejemplo (`src/app/data/datos-ejemplo.ts`). Los botones de
-guardar y eliminar avisan que la conexión con el backend se implementará en la siguiente entrega.
+### Seguridad
+
+* **Token:** se guarda en la cookie `ecotrack_jwt` con `SameSite=Strict`, `Secure` cuando la app corre en HTTPS y
+  `max-age` igual al tiempo de vida del JWT. Antes de usarlo se valida su formato y su expiración; si venció,
+  se borra. El *refresh token* no se guarda en el navegador.
+* **Interceptores:** `authInterceptor` envía `Authorization: Bearer` solo a la API propia (nunca a `/auth/**`);
+  `errorInterceptor` cierra la sesión y redirige al login ante un 401, y deja pasar el 403 para que la pantalla
+  muestre "No tienes permisos".
+* **Guards:** `authGuard` (rutas privadas), `invitadoGuard` (login y registro) y `rolGuard` (por rol, con
+  `data: { roles: [...] }`).
+* **Por rol en la interfaz:** el botón eliminar solo aparece al administrador; el estado *Auditado* solo se ofrece
+  a auditores y administradores; un operador solo puede registrar lotes a su nombre; los lotes auditados se muestran
+  como cerrados.
+
+### Paginación
+
+`ListadoPaginado` (`utils/listado-paginado.ts`) concentra el estado de cada listado: búsqueda con *debounce*
+de 350 ms, filtro, página y tamaño. Cada cambio arma la consulta y llama a `listarPaginado` del servicio
+(`GET /api/v1/{recurso}/paginado`); `switchMap` cancela la petición anterior si el usuario sigue escribiendo.
+El componente `app-paginacion` muestra "Mostrando X–Y de Z", los números de página y el selector de tamaño.
 
 ## Tecnologías
 
@@ -43,7 +61,7 @@ npm install
 npm start
 ```
 
-Abrir `http://localhost:4200` e iniciar sesión con un usuario registrado en el backend.
+Abrir `http://localhost:4200` e iniciar sesión (por ejemplo `admin@ecotrackchem.com` / `password123`).
 
 ```bash
 npm run build      # compilación de producción
@@ -57,11 +75,11 @@ La URL del backend se configura en `src/environments/environment.ts`.
 ```
 src/app/
 ├── models/          Interfaces de las entidades y catálogos de enums
-├── data/            Datos de ejemplo para las pantallas de diseño
-├── services/        AuthService (login JWT) y NotificacionService (mensajes)
-├── interceptors/    authInterceptor (agrega el JWT) y errorInterceptor (sesión vencida)
-├── guards/          authGuard (páginas privadas) e invitadoGuard (login/registro)
-├── utils/           Validadores personalizados y utilidades
+├── services/        AuthService, CrudService y servicios por entidad, NotificacionService
+├── interceptors/    authInterceptor (agrega el JWT) y errorInterceptor (401 / 403)
+├── guards/          authGuard, invitadoGuard y rolGuard
+├── utils/           Validadores, ListadoPaginado y manejo de errores HTTP
+├── testing/         Utilidades para las pruebas unitarias
 └── components/
     ├── shared/      Componentes reutilizables
     ├── layout/      Menú lateral + barra superior
@@ -83,5 +101,5 @@ src/app/
 | `SelectorCatalogo` | Control de formulario propio (`ControlValueAccessor`) con tarjetas seleccionables |
 | `Insignia` | Etiqueta de color para peligrosidad, estado, disposición y rol |
 | `BarraBusqueda` | Caja de búsqueda con enlace bidireccional (`model()`) |
-| `AvisoDiseno` | Aviso de pantalla en modo diseño |
+| `Paginacion` | Navegación entre páginas y selector de tamaño |
 | `IndicadorCarga`, `EstadoVacio`, `TarjetaIndicador`, `Logo`, `PanelAuth` | Estados de carga/vacío, indicadores y diseño del login |
