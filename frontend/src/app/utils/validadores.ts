@@ -30,3 +30,8 @@ export function coincideCon(otroCampo: string): ValidatorFn {
     return otro && control.value && control.value !== otro.value ? { noCoincide: true } : null;
   };
 }
+
+export const claveSegura: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const valor = control.value as string | null;
+  return valor && !(/[A-Za-z]/.test(valor) && /\d/.test(valor)) ? { claveDebil: true } : null;
+};
