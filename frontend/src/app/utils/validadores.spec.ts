@@ -1,5 +1,5 @@
 import { FormControl, FormGroup } from '@angular/forms';
-import { coincideCon, fechaHoyISO, fechaNoFutura, mayorQueCero, soloEspacios } from './validadores';
+import { claveSegura, coincideCon, fechaHoyISO, fechaNoFutura, mayorQueCero, soloEspacios } from './validadores';
 
 describe('Validadores personalizados', () => {
   it('soloEspacios rechaza textos con solo espacios', () => {
@@ -27,5 +27,11 @@ describe('Validadores personalizados', () => {
     expect(form.controls.confirmar.errors).toEqual({ noCoincide: true });
     form.controls.confirmar.setValue('secreto1');
     expect(form.controls.confirmar.errors).toBeNull();
+  });
+
+  it('claveSegura exige al menos una letra y un número', () => {
+    expect(claveSegura(new FormControl('solotexto'))).toEqual({ claveDebil: true });
+    expect(claveSegura(new FormControl('123456'))).toEqual({ claveDebil: true });
+    expect(claveSegura(new FormControl('clave123'))).toBeNull();
   });
 });
