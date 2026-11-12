@@ -6,7 +6,15 @@
   <a routerLink="/lotes" class="btn btn-light"><i class="bi bi-arrow-left me-1"></i>Volver al listado</a>
 </app-encabezado-pagina>
 
-<app-aviso-diseno />
+@if (cargando()) {
+  <app-indicador-carga texto="Cargando datos del lote..." />
+} @else {
+@if (errorServidor()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-x-circle-fill"></i>
+    <span>{{ errorServidor() }}</span>
+  </div>
+}
 
 <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
   <div class="row g-4">
@@ -35,9 +43,13 @@
             </div>
             <div class="col-12">
               <label class="form-label">Estado <span class="text-danger">*</span></label>
-              <app-selector-catalogo formControlName="estado" etiqueta="Estado del lote" [opciones]="estados"
+              <app-selector-catalogo formControlName="estado" etiqueta="Estado del lote" [opciones]="estadosDisponibles()"
                 [mostrarDescripcion]="true" [class.is-invalid]="invalido('estado')" />
               <app-error-campo [control]="form.controls.estado" [mensajes]="{ required: 'Selecciona el estado del lote.' }" />
+              <div class="form-text">
+                El estado avanza En proceso → Finalizado → Auditado y no retrocede. Solo un auditor ambiental o un
+                administrador puede marcar un lote como auditado; después ya no se modifica.
+              </div>
             </div>
           </div>
 
@@ -64,14 +76,21 @@
                 }
               </select>
               <app-error-campo [control]="form.controls.usuarioId" [mensajes]="{ required: 'Selecciona el responsable.' }" />
+              @if (!esAdministrador()) {
+                <div class="form-text">Solo un administrador puede asignar el lote a otro usuario.</div>
+              }
             </div>
           </div>
         </div>
 
         <div class="card-footer d-flex justify-content-end gap-2 p-3">
           <a routerLink="/lotes" class="btn btn-light">Cancelar</a>
-          <button type="submit" class="btn btn-primary px-4">
-            <i class="bi bi-check-lg me-1"></i>{{ esEdicion() ? 'Guardar cambios' : 'Registrar lote' }}
+          <button type="submit" class="btn btn-primary px-4" [disabled]="guardando()">
+            @if (guardando()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Guardando...
+            } @else {
+              <i class="bi bi-check-lg me-1"></i>{{ esEdicion() ? 'Guardar cambios' : 'Registrar lote' }}
+            }
           </button>
         </div>
       </div>
@@ -97,3 +116,4 @@
     </div>
   </div>
 </form>
+}
