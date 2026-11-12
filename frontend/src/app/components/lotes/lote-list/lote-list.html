@@ -6,16 +6,14 @@
   <a routerLink="nuevo" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuevo lote</a>
 </app-encabezado-pagina>
 
-<app-aviso-diseno />
-
 <div class="card card-eco">
   <div class="card-header py-3">
     <div class="row g-2 align-items-center">
       <div class="col-md-6 col-lg-5">
-        <app-barra-busqueda [(texto)]="busqueda" placeholder="Buscar por código, insumo o responsable..." />
+        <app-barra-busqueda [(texto)]="listado.busqueda" placeholder="Buscar por código, insumo o responsable..." />
       </div>
       <div class="col-md-4 col-lg-3">
-        <select class="form-select" aria-label="Filtrar por estado" [(ngModel)]="filtroEstado">
+        <select class="form-select" aria-label="Filtrar por estado" [(ngModel)]="listado.filtro">
           <option value="">Todos los estados</option>
           @for (estado of estados; track estado.valor) {
             <option [value]="estado.valor">{{ estado.etiqueta }}</option>
@@ -23,13 +21,21 @@
         </select>
       </div>
       <div class="col text-md-end small text-body-secondary">
-        {{ lotesFiltrados().length }} de {{ lotes().length }} lotes
+        {{ listado.totalElementos() }} {{ listado.totalElementos() === 1 ? 'lote' : 'lotes' }}
       </div>
     </div>
   </div>
 
   <div class="card-body p-0">
-    @if (lotes().length === 0) {
+    @if (listado.error()) {
+      <app-estado-vacio icono="bi-exclamation-triangle" titulo="No se pudo cargar el listado" [mensaje]="listado.error()">
+        <button type="button" class="btn btn-light" (click)="listado.recargar()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Reintentar
+        </button>
+      </app-estado-vacio>
+    } @else if (listado.cargando() && !listado.resultado()) {
+      <app-indicador-carga texto="Cargando lotes..." />
+    } @else if (listado.elementos().length === 0 && !listado.hayFiltros()) {
       <app-estado-vacio
         icono="bi-box-seam"
         titulo="Aún no hay lotes registrados"
@@ -37,12 +43,12 @@
       >
         <a routerLink="nuevo" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Crear lote</a>
       </app-estado-vacio>
-    } @else if (lotesFiltrados().length === 0) {
+    } @else if (listado.elementos().length === 0) {
       <app-estado-vacio icono="bi-search" titulo="Sin resultados" mensaje="Ningún lote coincide con los filtros aplicados.">
-        <button type="button" class="btn btn-light" (click)="limpiarFiltros()">Limpiar filtros</button>
+        <button type="button" class="btn btn-light" (click)="listado.limpiarFiltros()">Limpiar filtros</button>
       </app-estado-vacio>
     } @else {
-      <div class="table-responsive">
+      <div class="table-responsive" [class.opacity-50]="listado.cargando()">
         <table class="table table-hover align-middle mb-0 tabla-eco">
           <thead>
             <tr>
@@ -56,7 +62,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (lote of lotesFiltrados(); track lote.id) {
+            @for (lote of listado.elementos(); track lote.id) {
               <tr>
                 <td class="ps-3"><span class="codigo">{{ lote.codigoLote }}</span></td>
                 <td class="text-nowrap">{{ lote.fechaFabricacion | date: 'dd/MM/yyyy' }}</td>
@@ -65,29 +71,49 @@
                 <td><app-insignia [valor]="lote.estado" [opciones]="estados" /></td>
                 <td>{{ lote.usuarioNombre }}</td>
                 <td class="text-end text-nowrap pe-3">
-                  <a routerLink="/residuos/nuevo" [queryParams]="{ loteId: lote.id }" class="btn btn-sm btn-light text-success"
-                    title="Registrar residuo de este lote" aria-label="Registrar residuo de este lote">
-                    <i class="bi bi-recycle"></i>
-                  </a>
-                  <a [routerLink]="[lote.id, 'editar']" class="btn btn-sm btn-light ms-1" title="Editar" aria-label="Editar">
-                    <i class="bi bi-pencil-square"></i>
-                  </a>
-                  <button type="button" class="btn btn-sm btn-light text-danger ms-1" title="Eliminar" aria-label="Eliminar"
-                    (click)="loteAEliminar.set(lote)">
-                    <i class="bi bi-trash3"></i>
-                  </button>
+                  @if (lote.estado !== 'AUDITADO') {
+                    <a routerLink="/residuos/nuevo" [queryParams]="{ loteId: lote.id }" class="btn btn-sm btn-light text-success"
+                      title="Registrar residuo de este lote" aria-label="Registrar residuo de este lote">
+                      <i class="bi bi-recycle"></i>
+                    </a>
+                    <a [routerLink]="[lote.id, 'editar']" class="btn btn-sm btn-light ms-1" title="Editar" aria-label="Editar">
+                      <i class="bi bi-pencil-square"></i>
+                    </a>
+                    @if (esAdministrador()) {
+                      <button type="button" class="btn btn-sm btn-light text-danger ms-1" title="Eliminar" aria-label="Eliminar"
+                        (click)="loteAEliminar.set(lote)">
+                        <i class="bi bi-trash3"></i>
+                      </button>
+                    }
+                  } @else {
+                    <span class="small text-body-secondary" title="Un lote auditado ya no se modifica">
+                      <i class="bi bi-lock-fill me-1"></i>Cerrado
+                    </span>
+                  }
                 </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
+      @if (listado.resultado(); as pagina) {
+        <app-paginacion
+          [pagina]="pagina.pagina"
+          [totalPaginas]="pagina.totalPaginas"
+          [totalElementos]="pagina.totalElementos"
+          [tamanio]="listado.tamanio()"
+          [cantidadEnPagina]="pagina.contenido.length"
+          (cambiarPagina)="listado.irAPagina($event)"
+          (cambiarTamanio)="listado.cambiarTamanio($event)"
+        />
+      }
     }
   </div>
 </div>
 
 <app-dialogo-confirmacion
   [abierto]="!!loteAEliminar()"
+  [procesando]="eliminando()"
   titulo="¿Eliminar lote?"
   [mensaje]="'Se eliminará el lote ' + loteAEliminar()?.codigoLote + '. Esta acción no se puede deshacer.'"
   (confirmar)="confirmarEliminacion()"

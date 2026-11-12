@@ -6,7 +6,15 @@
   <a routerLink="/residuos" class="btn btn-light"><i class="bi bi-arrow-left me-1"></i>Volver al listado</a>
 </app-encabezado-pagina>
 
-<app-aviso-diseno />
+@if (cargando()) {
+  <app-indicador-carga texto="Cargando datos del residuo..." />
+} @else {
+@if (errorServidor()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-x-circle-fill"></i>
+    <span>{{ errorServidor() }}</span>
+  </div>
+}
 
 <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
   <div class="row g-4">
@@ -44,6 +52,7 @@
                 }
               </select>
               <app-error-campo [control]="form.controls.loteId" [mensajes]="{ required: 'Selecciona el lote de origen.' }" />
+              <div class="form-text">Los lotes auditados no aparecen: ya no admiten nuevos residuos.</div>
             </div>
           </div>
 
@@ -59,14 +68,24 @@
             <input id="requiereCertificado" type="checkbox" role="switch" class="form-check-input"
               formControlName="requiereCertificado" />
             <label for="requiereCertificado" class="form-check-label fw-medium">Requiere certificado de disposición</label>
-            <div class="form-text">Actívalo si la empresa operadora debe emitir un certificado de manejo.</div>
+            @if (certificadoObligatorio()) {
+              <div class="form-text text-danger">
+                <i class="bi bi-lock-fill me-1"></i>La recogida especial siempre requiere certificado de la empresa operadora.
+              </div>
+            } @else {
+              <div class="form-text">Actívalo si la empresa operadora debe emitir un certificado de manejo.</div>
+            }
           </div>
         </div>
 
         <div class="card-footer d-flex justify-content-end gap-2 p-3">
           <a routerLink="/residuos" class="btn btn-light">Cancelar</a>
-          <button type="submit" class="btn btn-primary px-4">
-            <i class="bi bi-check-lg me-1"></i>{{ esEdicion() ? 'Guardar cambios' : 'Registrar residuo' }}
+          <button type="submit" class="btn btn-primary px-4" [disabled]="guardando()">
+            @if (guardando()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Guardando...
+            } @else {
+              <i class="bi bi-check-lg me-1"></i>{{ esEdicion() ? 'Guardar cambios' : 'Registrar residuo' }}
+            }
           </button>
         </div>
       </div>
@@ -85,3 +104,4 @@
     </div>
   </div>
 </form>
+}
