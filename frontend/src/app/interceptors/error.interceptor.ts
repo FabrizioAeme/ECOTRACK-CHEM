@@ -14,15 +14,16 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       const esRutaAuth = req.url.includes('/auth/');
 
-      if (!esRutaAuth && (error.status === 401 || error.status === 403)) {
-        if (authService.getToken()) {
-          authService.cerrarSesion();
-          notificacion.advertencia(
-            'Tu sesión expiró. Vuelve a iniciar sesión para continuar.',
-            'Sesión finalizada',
-          );
-          enrutador.navigate(['/login']);
-        }
+      if (!esRutaAuth && error.status === 401) {
+        const habiaSesion = !!authService.sesion();
+        authService.cerrarSesion();
+        notificacion.advertencia(
+          habiaSesion
+            ? 'Tu sesión expiró o ya no es válida. Vuelve a iniciar sesión para continuar.'
+            : 'Debes iniciar sesión para acceder a esta información.',
+          'Sesión finalizada',
+        );
+        enrutador.navigate(['/login'], { queryParams: { returnUrl: enrutador.url } });
         return EMPTY;
       }
 

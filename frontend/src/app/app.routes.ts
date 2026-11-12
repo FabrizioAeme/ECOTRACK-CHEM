@@ -4,7 +4,7 @@ import { Registro } from './components/registro/registro';
 import { Layout } from './components/layout/layout';
 import { Dashboard } from './components/dashboard/dashboard';
 import { Error404 } from './components/error404/error404';
-import { authGuard, invitadoGuard } from './guards/auth.guard';
+import { authGuard, invitadoGuard, rolGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', component: Login, title: 'Iniciar sesión | EcoTrack Chem', canActivate: [invitadoGuard] },
@@ -20,7 +20,12 @@ export const routes: Routes = [
       { path: 'insumos', loadChildren: () => import('./components/insumos/insumos.routes').then((m) => m.INSUMOS_ROUTES) },
       { path: 'lotes', loadChildren: () => import('./components/lotes/lotes.routes').then((m) => m.LOTES_ROUTES) },
       { path: 'residuos', loadChildren: () => import('./components/residuos/residuos.routes').then((m) => m.RESIDUOS_ROUTES) },
-      { path: 'usuarios', loadChildren: () => import('./components/usuarios/usuarios.routes').then((m) => m.USUARIOS_ROUTES) },
+      {
+        path: 'usuarios',
+        canActivate: [rolGuard],
+        data: { roles: ['ADMINISTRADOR'] },
+        loadChildren: () => import('./components/usuarios/usuarios.routes').then((m) => m.USUARIOS_ROUTES),
+      },
     ],
   },
 
