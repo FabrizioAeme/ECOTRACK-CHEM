@@ -12,7 +12,7 @@ public class ResiduoIndustrialMapper {
 
     public ResiduoIndustrial toEntity(ResiduoIndustrialRequest dto, Lote lote) {
         return ResiduoIndustrial.builder()
-                .tipoResiduo(dto.tipoResiduo())
+                .tipoResiduo(dto.tipoResiduo().trim())
                 .volumenLitros(dto.volumenLitros())
                 .disposicionFinal(dto.disposicionFinal())
                 .requiereCertificado(dto.requiereCertificado())
@@ -21,7 +21,7 @@ public class ResiduoIndustrialMapper {
     }
 
     public void actualizarEntity(ResiduoIndustrial entity, ResiduoIndustrialRequest dto, Lote lote) {
-        entity.setTipoResiduo(dto.tipoResiduo());
+        entity.setTipoResiduo(dto.tipoResiduo().trim());
         entity.setVolumenLitros(dto.volumenLitros());
         entity.setDisposicionFinal(dto.disposicionFinal());
         entity.setRequiereCertificado(dto.requiereCertificado());
