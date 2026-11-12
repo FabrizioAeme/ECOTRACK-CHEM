@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { ROLES_USUARIO, RolUsuario } from '../../models/usuario.interface';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificacionService } from '../../services/notificacion.service';
@@ -9,6 +10,7 @@ interface ItemMenu {
   ruta: string;
   etiqueta: string;
   icono: string;
+  roles?: RolUsuario[];
 }
 
 interface SeccionMenu {
@@ -28,11 +30,15 @@ export class Layout {
   private notificacion = inject(NotificacionService);
 
   readonly correo = this.authService.correoUsuario;
-  readonly inicial = computed(() => (this.correo() ?? '?').charAt(0).toUpperCase());
+  readonly nombre = this.authService.nombreUsuario;
+  readonly inicial = computed(() => (this.nombre() || this.correo() || '?').charAt(0).toUpperCase());
+  readonly etiquetaRol = computed(
+    () => ROLES_USUARIO.find((r) => r.valor === this.authService.rol())?.etiqueta ?? 'Sin rol',
+  );
   readonly menuAbierto = signal(false);
   readonly hoy = new Date();
 
-  readonly secciones: SeccionMenu[] = [
+  private readonly todasLasSecciones: SeccionMenu[] = [
     {
       titulo: 'General',
       items: [{ ruta: '/dashboard', etiqueta: 'Panel de control', icono: 'bi-speedometer2' }],
@@ -47,9 +53,19 @@ export class Layout {
     },
     {
       titulo: 'Administración',
-      items: [{ ruta: '/usuarios', etiqueta: 'Usuarios', icono: 'bi-people' }],
+      items: [{ ruta: '/usuarios', etiqueta: 'Usuarios', icono: 'bi-people', roles: ['ADMINISTRADOR'] }],
     },
   ];
+
+  readonly secciones = computed(() => {
+    this.authService.rol();
+    return this.todasLasSecciones
+      .map((seccion) => ({
+        ...seccion,
+        items: seccion.items.filter((item) => !item.roles || this.authService.tieneRol(...item.roles)),
+      }))
+      .filter((seccion) => seccion.items.length > 0);
+  });
 
   cerrarSesion() {
     this.authService.cerrarSesion();
