@@ -30,10 +30,6 @@ export class NotificacionService {
     this.mostrar('info', titulo, mensaje);
   }
 
-  pendiente(accion: string) {
-    this.info(`${accion} se conectará con el backend en la siguiente entrega.`, 'Vista de diseño');
-  }
-
   cerrar(id: number) {
     this.notificaciones.update((lista) => lista.filter((n) => n.id !== id));
   }

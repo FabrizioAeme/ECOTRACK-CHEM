@@ -2,9 +2,12 @@
   <h2 class="h3 fw-bold mb-1">Crear cuenta</h2>
   <p class="text-body-secondary mb-4">Regístrate para empezar a trazar los insumos de tu planta.</p>
 
-  <app-aviso-diseno
-    mensaje="Vista de diseño: la creación de cuentas se habilitará en la siguiente entrega. Para ingresar usa una cuenta ya registrada."
-  />
+  @if (error()) {
+    <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+      <i class="bi bi-x-circle-fill"></i>
+      <span>{{ error() }}</span>
+    </div>
+  }
 
   <form [formGroup]="form" (ngSubmit)="registrar()" novalidate>
     <div class="row g-3 mb-3">
@@ -55,8 +58,12 @@
       <span>Las cuentas nuevas se crean con el rol <strong>Operador de laboratorio</strong>.</span>
     </div>
 
-    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
-      <i class="bi bi-person-plus me-2"></i>Crear cuenta
+    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold" [disabled]="enviando()">
+      @if (enviando()) {
+        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Creando cuenta...
+      } @else {
+        <i class="bi bi-person-plus me-2"></i>Crear cuenta
+      }
     </button>
   </form>
 

@@ -4,8 +4,6 @@
   icono="bi-people"
 />
 
-<app-aviso-diseno />
-
 <div class="alert alert-light border d-flex gap-2 small">
   <i class="bi bi-info-circle text-success"></i>
   <span>
@@ -35,7 +33,15 @@
   </div>
 
   <div class="card-body p-0">
-    @if (usuariosFiltrados().length === 0) {
+    @if (error()) {
+      <app-estado-vacio icono="bi-exclamation-triangle" titulo="No se pudo cargar el listado" [mensaje]="error()">
+        <button type="button" class="btn btn-light" (click)="cargar()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Reintentar
+        </button>
+      </app-estado-vacio>
+    } @else if (cargando()) {
+      <app-indicador-carga texto="Cargando usuarios..." />
+    } @else if (usuariosFiltrados().length === 0) {
       <app-estado-vacio icono="bi-people" titulo="Sin resultados" mensaje="Ningún usuario coincide con la búsqueda." />
     } @else {
       <div class="table-responsive">

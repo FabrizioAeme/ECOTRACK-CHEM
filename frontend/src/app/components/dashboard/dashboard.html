@@ -1,14 +1,23 @@
 <app-encabezado-pagina
   titulo="Panel de control"
-  subtitulo="Resumen de la trazabilidad química de tu planta"
+  [subtitulo]="'Hola, ' + nombreUsuario() + '. Este es el resumen de la trazabilidad química de tu planta'"
   icono="bi-speedometer2"
 >
   <a routerLink="/lotes/nuevo" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuevo lote</a>
   <a routerLink="/residuos/nuevo" class="btn btn-outline-primary"><i class="bi bi-recycle me-1"></i>Registrar residuo</a>
 </app-encabezado-pagina>
 
-<app-aviso-diseno />
-
+@if (cargando()) {
+  <app-indicador-carga texto="Cargando el resumen..." />
+} @else if (error()) {
+  <div class="card card-eco">
+    <app-estado-vacio icono="bi-exclamation-triangle" titulo="No se pudo cargar el panel" [mensaje]="error()">
+      <button type="button" class="btn btn-light" (click)="cargar()">
+        <i class="bi bi-arrow-clockwise me-1"></i>Reintentar
+      </button>
+    </app-estado-vacio>
+  </div>
+} @else {
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3">
     <app-tarjeta-indicador titulo="Insumos" [valor]="insumos().length" icono="bi-eyedropper"
@@ -106,3 +115,4 @@
     </div>
   </div>
 </div>
+}
