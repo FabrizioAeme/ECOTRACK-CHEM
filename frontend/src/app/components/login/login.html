@@ -1,0 +1,68 @@
+<app-panel-auth>
+  <h2 class="h3 fw-bold mb-1">Iniciar sesión</h2>
+  <p class="text-body-secondary mb-4">Ingresa con tu correo para continuar.</p>
+
+  @if (error()) {
+    <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+      <i class="bi bi-x-circle-fill"></i>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="iniciarSesion()" novalidate>
+    <div class="mb-3">
+      <label for="correo" class="form-label">Correo electrónico</label>
+      <div class="input-group has-validation">
+        <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+        <input
+          id="correo"
+          type="email"
+          class="form-control"
+          formControlName="correo"
+          placeholder="nombre@empresa.com"
+          autocomplete="username"
+          [class.is-invalid]="invalido('correo')"
+        />
+        <app-error-campo [control]="form.controls.correo" />
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label for="clave" class="form-label">Contraseña</label>
+      <div class="input-group has-validation">
+        <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+        <input
+          id="clave"
+          class="form-control"
+          formControlName="clave"
+          placeholder="Tu contraseña"
+          autocomplete="current-password"
+          [type]="mostrarClave() ? 'text' : 'password'"
+          [class.is-invalid]="invalido('clave')"
+        />
+        <button
+          type="button"
+          class="btn btn-light"
+          [attr.aria-label]="mostrarClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          (click)="mostrarClave.set(!mostrarClave())"
+        >
+          <i class="bi" [class]="mostrarClave() ? 'bi-eye-slash' : 'bi-eye'"></i>
+        </button>
+        <app-error-campo [control]="form.controls.clave" />
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold" [disabled]="cargando()">
+      @if (cargando()) {
+        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Ingresando...
+      } @else {
+        <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+      }
+    </button>
+  </form>
+
+  <p class="text-center text-body-secondary mt-4 mb-0">
+    ¿Aún no tienes una cuenta?
+    <a routerLink="/registro" class="fw-semibold text-decoration-none">Regístrate aquí</a>
+  </p>
+</app-panel-auth>

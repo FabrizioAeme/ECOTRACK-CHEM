@@ -11,8 +11,8 @@ public class InsumoQuimicoMapper {
 
     public InsumoQuimico toEntity(InsumoQuimicoRequest dto) {
         return InsumoQuimico.builder()
-                .codigoCas(dto.codigoCas())
-                .nombre(dto.nombre())
+                .codigoCas(dto.codigoCas().trim())
+                .nombre(dto.nombre().trim())
                 .nivelPureza(dto.nivelPureza())
                 .nivelPeligrosidad(dto.nivelPeligrosidad())
                 .stockDisponible(dto.stockDisponible())
@@ -20,8 +20,8 @@ public class InsumoQuimicoMapper {
     }
 
     public void actualizarEntity(InsumoQuimico entity, InsumoQuimicoRequest dto) {
-        entity.setCodigoCas(dto.codigoCas());
-        entity.setNombre(dto.nombre());
+        entity.setCodigoCas(dto.codigoCas().trim());
+        entity.setNombre(dto.nombre().trim());
         entity.setNivelPureza(dto.nivelPureza());
         entity.setNivelPeligrosidad(dto.nivelPeligrosidad());
         entity.setStockDisponible(dto.stockDisponible());
