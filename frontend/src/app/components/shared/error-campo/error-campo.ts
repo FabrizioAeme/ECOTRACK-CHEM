@@ -65,6 +65,8 @@ function mensajePorDefecto(tipo: string, detalle: any): string {
       return 'La fecha no puede ser posterior a hoy.';
     case 'noCoincide':
       return 'Las contraseñas no coinciden.';
+    case 'claveDebil':
+      return 'Debe contener al menos una letra y un número.';
     case 'servidor':
       return String(detalle);
     default:

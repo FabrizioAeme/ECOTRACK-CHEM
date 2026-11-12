@@ -6,7 +6,15 @@
   <a routerLink="/insumos" class="btn btn-light"><i class="bi bi-arrow-left me-1"></i>Volver al listado</a>
 </app-encabezado-pagina>
 
-<app-aviso-diseno />
+@if (cargando()) {
+  <app-indicador-carga texto="Cargando insumo..." />
+} @else {
+@if (errorServidor()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-x-circle-fill"></i>
+    <span>{{ errorServidor() }}</span>
+  </div>
+}
 
 <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
   <div class="row g-4">
@@ -39,7 +47,7 @@
               <label for="nivelPureza" class="form-label">Nivel de pureza <span class="text-danger">*</span></label>
               <div class="input-group has-validation">
                 <input id="nivelPureza" type="number" class="form-control" formControlName="nivelPureza"
-                  min="0" max="100" step="0.01" placeholder="0 - 100" [class.is-invalid]="invalido('nivelPureza')" />
+                  min="0.01" max="100" step="0.01" placeholder="0.01 - 100" [class.is-invalid]="invalido('nivelPureza')" />
                 <span class="input-group-text">%</span>
                 <app-error-campo [control]="form.controls.nivelPureza" />
               </div>
@@ -63,8 +71,12 @@
 
         <div class="card-footer d-flex justify-content-end gap-2 p-3">
           <a routerLink="/insumos" class="btn btn-light">Cancelar</a>
-          <button type="submit" class="btn btn-primary px-4">
-            <i class="bi bi-check-lg me-1"></i>{{ esEdicion() ? 'Guardar cambios' : 'Registrar insumo' }}
+          <button type="submit" class="btn btn-primary px-4" [disabled]="guardando()">
+            @if (guardando()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Guardando...
+            } @else {
+              <i class="bi bi-check-lg me-1"></i>{{ esEdicion() ? 'Guardar cambios' : 'Registrar insumo' }}
+            }
           </button>
         </div>
       </div>
@@ -93,3 +105,4 @@
     </div>
   </div>
 </form>
+}
