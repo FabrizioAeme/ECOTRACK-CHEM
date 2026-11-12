@@ -14,14 +14,30 @@ export function obtenerMensajeError(
 
   const cuerpo = error.error as Partial<ApiError> | null;
   if (cuerpo?.details && error.status === 400) {
-    const detalle = Object.entries(cuerpo.details)
-      .map(([campo, mensaje]) => `${campo}: ${mensaje}`)
-      .join(' · ');
-    return `${cuerpo.error ?? 'Datos inválidos'}. ${detalle}`;
+    const detalle = Object.values(cuerpo.details).join(' · ');
+    return `${cuerpo.error ?? 'Datos inválidos'}: ${detalle}`;
   }
   if (cuerpo?.error) {
     return cuerpo.error;
   }
 
-  return error.status >= 500 ? 'Error interno del servidor. Inténtalo más tarde.' : porDefecto;
+  switch (error.status) {
+    case 401:
+      return 'Tu sesión no es válida. Inicia sesión nuevamente.';
+    case 403:
+      return 'No tienes permisos para realizar esta acción.';
+    case 404:
+      return 'El registro solicitado no existe.';
+    case 409:
+      return 'La operación entra en conflicto con datos existentes.';
+    default:
+      return error.status >= 500 ? 'Error interno del servidor. Inténtalo más tarde.' : porDefecto;
+  }
+}
+
+export function erroresPorCampo(error: unknown): Record<string, string> {
+  if (error instanceof HttpErrorResponse && error.status === 400) {
+    return (error.error as Partial<ApiError> | null)?.details ?? {};
+  }
+  return {};
 }
